@@ -1,6 +1,5 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using System.Linq.Expressions;
+using System.Configuration;
 using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -36,7 +35,7 @@ namespace TelegramBotExperiments
         static void Main()
         {
             Console.WriteLine("App start.");
-            var botClient = new TelegramBotClient("6431100041:AAGhaGlCSasJuE-sK79EUGeBoZ-ZSpr3g2o");
+            var botClient = new TelegramBotClient(ConfigurationManager.AppSettings["TgBotToken"]);
             Console.WriteLine("Bot client created.");
             botClient.StartReceiving(Update, Error);
             Console.WriteLine("Bot start reciving.");
