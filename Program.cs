@@ -3,6 +3,8 @@ using System.Configuration;
 using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBotExperiments
 {
@@ -12,76 +14,53 @@ namespace TelegramBotExperiments
         static void Main()
         {
             Console.WriteLine("App start.");
-            var botClient = new TelegramBotClient(ConfigurationManager.AppSettings["TgBotToken"]);
+            TgBot tgBot = new TgBot(ConfigurationManager.AppSettings["TgBotToken"]);
+            var context = new DataBaseContext();
+            BotOperator botOperator = new BotOperator(tgBot, context);
             Console.WriteLine("Bot client created.");
-            botClient.StartReceiving(Update, Error);
+            botOperator.Bot.StartReceiving();
             Console.WriteLine("Bot start reciving.");
             Console.ReadLine();
+            context.Dispose();
         }
-        async static Task Help(ITelegramBotClient client, Update update, CancellationToken token)
-        {
-            StringBuilder answer = new StringBuilder();
-            foreach(KeyValuePair<string, string> pair in Discriptions)
-                answer.Append(String.Format("{0} - {1}\n", pair.Key, pair.Value));
-            await client.SendTextMessageAsync(update.Message.Chat.Id, answer.ToString());
-        }
-        private static Task Start(ITelegramBotClient client, Update update, CancellationToken token)
-        {
-            throw new NotImplementedException();
-        }
-        async static Task Error(ITelegramBotClient client, Exception exception, CancellationToken token)
-        {
-            Console.WriteLine("Bot Error.");
-            Console.WriteLine(exception);
-        }
-        async static Task Update(ITelegramBotClient client, Update update, CancellationToken token)
-        {
-            if (update.Message == null) 
-            {
-                Console.WriteLine("update.Message == null");
-                Console.WriteLine(update);
-                return;
-            }
-
-            Console.WriteLine(String.Format("Bot try to make command {0}.", update.Message.Text));
-            if (commands.TryGetValue(update.Message.Text, out Func<ITelegramBotClient, Update, CancellationToken, Task> deleg)) 
-            {
-                try
-                {
-                    await deleg(client, update, token); 
-                    Console.WriteLine(String.Format("Bot successfully make command {0}.", update.Message.Text));
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(String.Format("Bot fails to make command {0}.", update.Message.Text));
-                    Console.WriteLine(e);
-                }
-                return;
-            } 
-            else 
-            {
-                Console.WriteLine(String.Format("Bot try to find session and continue with parameter: {0}.", update.Message.Text));
-                if (false) // Поиск сессии в базе если нашел, то продолжить сессию в ином случае выкинуть
-                {
-                    Console.WriteLine(String.Format("Bot found session and try to continue with parameter: {0}.", update.Message.Text));
-                    return;
-                }
-                else 
-                {
-                    Console.WriteLine(String.Format("Bot fails to find session and continue with parameter: {0}.", update.Message.Text));
-                }
-            }
-            Console.WriteLine("Bot command and session not found.");
-            await client.SendTextMessageAsync(update.Message.Chat.Id, "Команда и сессия не найдена");
-            return; 
-        }
-        static Dictionary<string, string> Discriptions = new Dictionary<string, string> {
-            { "/start", "Запрос на авторизацию, если вы были авторизованы, то вы выйдете из аккаунта TeamFlame" },
-            { "/help", "Выводит все команды" },
-        }; 
-        static Dictionary<string, Func<ITelegramBotClient, Update, CancellationToken, Task>> commands = new Dictionary<string, Func<ITelegramBotClient, Update, CancellationToken, Task>> {
-            { "/start", Start },
-            { "/help", Help },
-        };
     }
 }
+
+/*/*async static Task Help(ITelegramBotClient client, Update update, CancellationToken token)
+        {
+            StringBuilder answer = new StringBuilder();
+            List<KeyboardButton> buttons = new List<KeyboardButton>();
+            foreach(KeyValuePair<string, string> pair in Discriptions)
+            {
+                answer.Append(String.Format("{0} - {1}\n", pair.Key, pair.Value));
+                KeyboardButton Button = new KeyboardButton(pair.Key);
+                buttons.Add(Button);
+            }
+
+            ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup(SortButtons(buttons));
+
+            await client.SendTextMessageAsync(update.Message.Chat.Id, answer.ToString(), replyMarkup: keyboard);
+
+            //await client.SendTextMessageAsync(update.Message.Chat.Id, answer.ToString());
+        }
+        async static Task Location(ITelegramBotClient client, Update update, CancellationToken token)
+        {
+            //await client.SendTextMessageAsync(update.Message.Chat.Id, answer.ToString());
+        }
+        private static List<List<KeyboardButton>> SortButtons(List<KeyboardButton> buttons) 
+        {
+            List<List<KeyboardButton>> MatrixOfButtons = new List<List<KeyboardButton>>();
+            int i = 0;
+            if (buttons.Count % 2 != 0)
+            {
+                MatrixOfButtons.Add(new List<KeyboardButton>{buttons[0]});
+                i = 1;
+            }
+            for ( ; i < buttons.Count; i++) 
+            {
+                List<KeyboardButton> row = new List<KeyboardButton>{buttons[i], buttons[i+1]};
+                i = i + 1;
+                MatrixOfButtons.Add(row);
+            }
+            return MatrixOfButtons;
+        }*/
