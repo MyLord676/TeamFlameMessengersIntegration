@@ -6,7 +6,8 @@ namespace TelegramBotExperiments
     abstract class IBot
     {
         public abstract void StartReceiving();
-        public abstract Task Send(string id, string s);
+        public abstract Task Send(string id, string message);
+        public abstract Task SendButtonsIfPossible(string id, string message, string[] buttons);
         public event UpdateDelegate UpdateDelegate;
         protected virtual void RaiseSampleEvent(string id, string s)
         {
